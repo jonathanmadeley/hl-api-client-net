@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace HL.Client.Models
+namespace HL.Client.Entity
 {
     /// <summary>
-    /// Defines an account model.
+    /// Defines an account entity.
     /// </summary>
-    public class AccountModel
+    public class AccountEntity
     {
         /// <summary>
         /// Gets or sets the Id.

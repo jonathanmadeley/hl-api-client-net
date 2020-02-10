@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HL.Client", "src\HL.Client\HL.Client.csproj", "{2DCF0DE4-A3DD-42B1-963C-ACBA826A15B5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HL.Client.Example", "src\HL.Client.Example\HL.Client.Example.csproj", "{3F1937EE-E619-4B18-AB94-DB82F5BD6189}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HL.Client.Example", "samples\HL.Client.Example\HL.Client.Example.csproj", "{3F1937EE-E619-4B18-AB94-DB82F5BD6189}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{828B37B1-E41C-4D49-A4CA-B7589D191F1E}"
 	ProjectSection(SolutionItems) = preProject

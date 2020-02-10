@@ -1,4 +1,5 @@
-﻿using HL.Client.Operations;
+﻿using HL.Client;
+using HL.Client.Operations;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -17,11 +18,12 @@ namespace HL.Client
         #region Fields
         private Authentication.Authentication _authentication;
         private Requestor _requestor;
-        private PortfolioOperations _profileOperations;
+        private AccountOperations _accountOperations;
         #endregion
 
         #region Authentication
-        public virtual Authentication.Authentication Authentication {
+        public virtual Authentication.Authentication Authentication
+        {
             get {
                 return _authentication;
             }
@@ -29,9 +31,10 @@ namespace HL.Client
         #endregion
 
         #region Operations
-        public virtual PortfolioOperations PortfolioOperations {
+        public virtual AccountOperations AccountOperations
+        {
             get {
-                return _profileOperations;
+                return _accountOperations;
             }
         }
         #endregion
@@ -49,7 +52,7 @@ namespace HL.Client
             _authentication = new Authentication.Authentication(_requestor);
 
             // Setup the operations 
-            _profileOperations = new PortfolioOperations(_requestor);
+            _accountOperations = new AccountOperations(_requestor);
         }
         #endregion
     }

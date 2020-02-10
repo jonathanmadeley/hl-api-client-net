@@ -21,7 +21,9 @@ namespace HL.Client.Example
 
             // Client is now authenticated.
 
-            var accounts = await client.PortfolioOperations.GetAccountsAsync();
+            var accounts = await client.AccountOperations.ListAsync();
+
+            var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
 
             return;
         }
