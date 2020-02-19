@@ -88,7 +88,7 @@ namespace HL.Client.Operations
             var body = table.SelectSingleNode("tbody");
             var rows = body.Descendants("tr").ToArray();
 
-            // Convert into stock holding models
+            // Convert into stock holding entities
             StockEntity[] stocks = new StockEntity[rows.Length];
             for(int i = 0; i < stocks.Length; i++)
             {
@@ -112,6 +112,61 @@ namespace HL.Client.Operations
             }
 
             return stocks;
+        }
+
+        /// <summary>
+        /// Gets a list of transactions for an account.
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
+        public async Task<TransactionEntity[]> ListTransactions(int accountId)
+        {
+            // Make request
+            var response = await _requestor.GetAsync($"my-accounts/capital-transaction-history/account/{accountId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Check if 404
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    throw new ArgumentException("Unable to find account.", "accountId");
+
+                throw new Exception($"Unable to get transactions for account: {accountId}");
+            }
+
+            // Convert into a HTML doc
+            HtmlDocument doc = new HtmlDocument();
+            string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
+            doc.LoadHtml(html);
+
+            // Get the table
+            var table = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("transaction-history-table")).SingleOrDefault();
+            var body = table.SelectSingleNode("tbody");
+            var rows = body.Descendants("tr").ToArray();
+
+            // Convert into transaction entities
+            TransactionEntity[] transactions = new TransactionEntity[rows.Length];
+            for (int i = 0; i < transactions.Length; i++)
+            {
+                // Get the columns in the rows
+                var columns = rows[i].Descendants("td").ToArray();
+
+                transactions[i] = new TransactionEntity()
+                {
+                    TradeDate = DateTime.Parse(columns[0].InnerText.Trim('\r', '\n')),
+                    SettleDate = DateTime.Parse(columns[1].InnerText.Trim('\r', '\n')),
+                    
+                    // Determine the reference
+                    Reference = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").InnerText.Trim('\r', '\n') : columns[2].InnerText.Trim('\r', '\n'),
+                    ReferenceLink = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").Attributes.SingleOrDefault(a => a.Name == "href").Value : null,
+
+                    Description = columns[3].InnerText.Trim('\r', '\n').Trim(),
+                    UnitCost = double.TryParse(columns[4].InnerText.Trim('\r', '\n'), out double unitPrice) ? unitPrice : (double?)null,
+                    Quantity = double.TryParse(columns[5].InnerText.Trim('\r', '\n'), out double quantity) ? quantity : (double?)null,
+                    Value = double.TryParse(columns[6].InnerText.Trim('\r', '\n'), out double value) ? value : 0
+                };
+            }
+
+            return transactions;
         }
         #endregion
 

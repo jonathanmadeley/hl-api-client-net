@@ -32,15 +32,7 @@ namespace HL.Client
             // Send the request
             HttpResponseMessage response = await _httpClient.SendAsync(request, cancelationToken).ConfigureAwait(false);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return response;
-            } else
-            {
-                // Figure out error handling here.
-                throw new Exception("Error!");
-                return response;
-            }
+            return response;
         }
 
         /// <summary>

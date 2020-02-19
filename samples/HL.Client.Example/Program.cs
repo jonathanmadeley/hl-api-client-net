@@ -23,7 +23,9 @@ namespace HL.Client.Example
 
             var accounts = await client.AccountOperations.ListAsync();
 
-            var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
+            //var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
+
+            var transactions = await client.AccountOperations.ListTransactions(accounts[0].Id);
 
             return;
         }

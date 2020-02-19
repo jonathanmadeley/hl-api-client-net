@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 src/HL.Client.Example/Properties/launchSettings.json
 .DS_Store
+samples/HL.Client.Example/Properties/launchSettings.json
