@@ -19,22 +19,22 @@ namespace HL.Client.Entity
         /// <summary>
         /// Gets or sets the number of units held.
         /// </summary>
-        public double UnitsHeld { get; set; }
+        public decimal UnitsHeld { get; set; }
 
         /// <summary>
         /// Gets or sets the price of the unit.
         /// </summary>
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the holding.
         /// </summary>
-        public double Value { get; set; }
+        public decimal Value { get; set; }
 
         /// <summary>
         /// Gets or sets the cost of the holding.
         /// </summary>
-        public double Cost { get; set; }
+        public decimal Cost { get; set; }
 
         /// <summary>
         /// Gets or sets the gains or losses for the holding.

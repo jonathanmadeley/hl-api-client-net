@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HL.Client.Authentication.Stages
+namespace HL.Client.Authentication
 {
     /// <summary>
     /// Defines the setup for login stage 1.
@@ -20,9 +16,9 @@ namespace HL.Client.Authentication.Stages
         #endregion
 
         #region Methods
-        public override async Task BuildFieldsAsync()
+        public override Dictionary<string, string> BuildFields()
         {
-            Fields = new Dictionary<string, string>()
+            return new Dictionary<string, string>()
             {
                 { "username", _username },
                 { "date-of-birth",  $"{_birthday.ToString("ddMMyy")}" }

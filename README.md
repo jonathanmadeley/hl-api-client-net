@@ -1,9 +1,11 @@
 # Hargreaves Lansdown API Client
-A simple API client for pulling information about your ISA's from Hargreaves Lansdown written in C#.
+A simple API client for pulling information about your ISA's from Hargreaves Lansdown written in C#. This project uses the web portal for HL's services and outputs the results in a computer-readable format.
+
 
 ## Introduction
 
 This is a simple client library for Hargreaves Lansdown. No Open API exists for regular traders so the routes this client operates on are those of which the web portal operates on. 
+
 
 ## Authentication
 
@@ -15,11 +17,14 @@ It is important to note that *your account will be locked if you enter invalid c
 
 
 ## Motivation
-The motivation for this client comes from the lack of an Open API provided by Hargreaves Lansdown for their regular customers. Automated scripts allow individuals and small traders alike to manage their investments with ease so it does seem rather odd no Open API is available.
+
+The motivation for this client comes from the lack of an Open API provided by Hargreaves Lansdown for their regular customers. Automated scripts allow individuals and small traders alike to manage their investments with ease so it does seem rather odd not to offer an Open API like other companies.
+
 
 ## Contributions
 
 I have only added limited functionality to this client library, to service the needs I personally have. Pull requests are accepted and encouraged!
+
 
 ## Licensing
 

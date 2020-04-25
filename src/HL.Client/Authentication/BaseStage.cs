@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HL.Client.Authentication.Stages
+namespace HL.Client.Authentication
 {
     /// <summary>
     /// Defines the base class for authenticating.
@@ -23,7 +23,6 @@ namespace HL.Client.Authentication.Stages
         public string Path { get; set; }
 
         public string ExpectedResponse { get; set; }
-        public Dictionary<string, string> Fields { get; set; }
         public HtmlDocument Document { get; set; }
         #endregion
 
@@ -39,10 +38,10 @@ namespace HL.Client.Authentication.Stages
         }
 
         /// <summary>
-        /// Load the verification toekn for this stage.
+        /// Load the verification token for this stage.
         /// </summary>
         /// <returns></returns>
-        public async Task<string> LoadVerificationTokenAsync()
+        public string GetVerificationToken()
         {
             var input = Document.DocumentNode.Descendants("input").Where(i => i.Attributes["name"]?.Value == "hl_vt").SingleOrDefault();
 
@@ -53,7 +52,7 @@ namespace HL.Client.Authentication.Stages
         }
 
         // Build the fields to send.
-        public abstract Task BuildFieldsAsync();
+        public abstract Dictionary<string, string> BuildFields();
 
         /// <summary>
         /// Submit this stage.
@@ -61,11 +60,10 @@ namespace HL.Client.Authentication.Stages
         /// <returns></returns>
         public async Task SubmitAsync()
         {
-            // Start by getting the verification token
-            string vt = await LoadVerificationTokenAsync();
-            Fields.Add("hl_vt", vt);
+            Dictionary<string, string> fields = BuildFields();
+            fields.Add("hl_vt", GetVerificationToken());
 
-            var response = await _requestor.PostAsync(Path, new FormUrlEncodedContent(Fields)).ConfigureAwait(false);
+            var response = await _requestor.PostAsync(Path, new FormUrlEncodedContent(fields)).ConfigureAwait(false);
 
             if (response.RequestMessage.RequestUri.AbsolutePath != $"/{ExpectedResponse}")
             {
@@ -78,11 +76,9 @@ namespace HL.Client.Authentication.Stages
         /// Run the stage.
         /// </summary>
         /// <returns></returns>
-        public async Task RunStage()
+        public async Task RunStageAsync()
         {
             await LoadPage().ConfigureAwait(false);
-
-            await BuildFieldsAsync().ConfigureAwait(false);
 
             await SubmitAsync().ConfigureAwait(false);
         }

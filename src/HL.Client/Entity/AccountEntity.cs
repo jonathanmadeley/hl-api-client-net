@@ -23,21 +23,21 @@ namespace HL.Client.Entity
         /// <summary>
         /// Gets or sets the stock value.
         /// </summary>
-        public double StockValue { get; set; }
+        public decimal StockValue { get; set; }
 
         /// <summary>
         /// Gets or sets the cash value.
         /// </summary>
-        public double CashValue { get; set; }
+        public decimal CashValue { get; set; }
 
         /// <summary>
         /// Gets or sets the total value.
         /// </summary>
-        public double TotalValue { get; set; }
+        public decimal TotalValue { get; set; }
 
         /// <summary>
         /// Gets or sets the available balance.
         /// </summary>
-        public double Available { get; set; }
+        public decimal Available { get; set; }
     }
 }

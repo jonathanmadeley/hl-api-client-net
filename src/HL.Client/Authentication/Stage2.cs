@@ -2,11 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HL.Client.Authentication.Stages
+namespace HL.Client.Authentication
 {
     /// <summary>
     /// Defines stage two of the login process.
@@ -22,7 +19,7 @@ namespace HL.Client.Authentication.Stages
         #endregion
 
         #region Methods
-        public override async Task BuildFieldsAsync()
+        public override Dictionary<string, string> BuildFields()
         {
             // Determine the inputs needed from the security number
             var container = Document.DocumentNode.Descendants("div").Where(d => d.HasClass("secure-number-container")).SingleOrDefault();
@@ -49,7 +46,7 @@ namespace HL.Client.Authentication.Stages
             for (int i = 0; i < securityNumber.Length; i++)
                 securityNumber[i] = int.Parse(_securityNumber.Substring(requiredDigits[i], 1));
 
-            Fields = new Dictionary<string, string>()
+            return new Dictionary<string, string>()
             {
                 { "online-password-verification", _password },
                 { "secure-number[1]", securityNumber[0].ToString() },
@@ -57,8 +54,6 @@ namespace HL.Client.Authentication.Stages
                 { "secure-number[3]", securityNumber[2].ToString() },
                 { "submit", "Log in" }
             };
-
-            return;
         }
         #endregion
 

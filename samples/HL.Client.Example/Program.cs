@@ -17,14 +17,11 @@ namespace HL.Client.Example
             Client client = new Client();
 
             // Start
-            await client.Authentication.StartAuthentication(username, password, birthday, securityCode);
+            await client.AuthenticateAsync(username, password, birthday, securityCode);
 
             // Client is now authenticated.
-
             var accounts = await client.AccountOperations.ListAsync();
-
-            //var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
-
+            var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
             var transactions = await client.AccountOperations.ListTransactions(accounts[0].Id);
 
             return;

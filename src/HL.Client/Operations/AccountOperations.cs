@@ -48,10 +48,10 @@ namespace HL.Client.Operations
                 {
                     Id = int.Parse(columns[0].SelectSingleNode("a").Attributes.Single(x => x.Name == "href").Value.Remove(0, Constants.BaseUrl.Length).Split('/')[3]),
                     Name = columns[0].SelectSingleNode("a").InnerText.Trim('\n', '\r').Trim(),
-                    StockValue = double.Parse(columns[1].SelectSingleNode("a").InnerText.Split('£')[1]),
-                    CashValue = double.Parse(columns[2].InnerText.Split('£')[1]),
-                    TotalValue = double.Parse(columns[3].SelectSingleNode("strong").InnerText.Split('£')[1]),
-                    Available = double.Parse(columns[4].SelectSingleNode("a").InnerText.Split('£')[1])
+                    StockValue = decimal.Parse(columns[1].SelectSingleNode("a").InnerText.Split('£')[1]),
+                    CashValue = decimal.Parse(columns[2].InnerText.Split('£')[1]),
+                    TotalValue = decimal.Parse(columns[3].SelectSingleNode("strong").InnerText.Split('£')[1]),
+                    Available = decimal.Parse(columns[4].SelectSingleNode("a").InnerText.Split('£')[1])
                 };
             }
 
@@ -99,14 +99,14 @@ namespace HL.Client.Operations
                 {
                     Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
                     Name = columns[0].SelectSingleNode("a").InnerText.Trim('\r', '\n').Trim(),
-                    UnitsHeld = double.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
-                    Price = double.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                    Value = double.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
-                    Cost = double.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                    UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
+                    Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                    Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
+                    Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
                     GainsLoss = new GainsLossEntity
                     {
-                        Pounds = double.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                        Percentage = double.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
+                        Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                        Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
                     }
                 };
             }
@@ -160,9 +160,9 @@ namespace HL.Client.Operations
                     ReferenceLink = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").Attributes.SingleOrDefault(a => a.Name == "href").Value : null,
 
                     Description = columns[3].InnerText.Trim('\r', '\n').Trim(),
-                    UnitCost = double.TryParse(columns[4].InnerText.Trim('\r', '\n'), out double unitPrice) ? unitPrice : (double?)null,
-                    Quantity = double.TryParse(columns[5].InnerText.Trim('\r', '\n'), out double quantity) ? quantity : (double?)null,
-                    Value = double.TryParse(columns[6].InnerText.Trim('\r', '\n'), out double value) ? value : 0
+                    UnitCost = decimal.TryParse(columns[4].InnerText.Trim('\r', '\n'), out decimal unitPrice) ? unitPrice : (decimal?)null,
+                    Quantity = decimal.TryParse(columns[5].InnerText.Trim('\r', '\n'), out decimal quantity) ? quantity : (decimal?)null,
+                    Value = decimal.TryParse(columns[6].InnerText.Trim('\r', '\n'), out decimal value) ? value : 0
                 };
             }
 

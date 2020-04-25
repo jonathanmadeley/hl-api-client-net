@@ -37,16 +37,16 @@ namespace HL.Client.Entity
         /// <summary>
         /// Gets or sets the unit cost.
         /// </summary>
-        public double? UnitCost { get; set; }
+        public decimal? UnitCost { get; set; }
 
         /// <summary>
         /// Gets or sets the quantity.
         /// </summary>
-        public double? Quantity { get; set; }
+        public decimal? Quantity { get; set; }
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        public double Value { get; set; }
+        public decimal Value { get; set; }
     }
 }

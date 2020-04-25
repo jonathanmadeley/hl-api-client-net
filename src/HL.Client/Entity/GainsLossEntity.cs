@@ -9,11 +9,11 @@ namespace HL.Client.Entity
         /// <summary>
         /// Get or sets the pound value.
         /// </summary>
-        public double Pounds { get; set; }
+        public decimal Pounds { get; set; }
 
         /// <summary>
         /// Gets or sets the percentage.
         /// </summary>
-        public double Percentage { get; set; }
+        public decimal Percentage { get; set; }
     }
 }
