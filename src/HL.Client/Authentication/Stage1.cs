@@ -16,6 +16,7 @@ namespace HL.Client.Authentication
         #endregion
 
         #region Methods
+        /// <inheritdoc/>
         public override Dictionary<string, string> BuildFields()
         {
             return new Dictionary<string, string>()

@@ -19,7 +19,6 @@ namespace HL.Client
         #region Fields
         private bool _isAuthenticated = false;
         private Requestor _requestor;
-        private AccountOperations _accountOperations;
         #endregion
 
         #region Authentication
@@ -39,7 +38,7 @@ namespace HL.Client
                                     birthday);
 
             // Run stage 1
-            await s1.RunStageAsync().ConfigureAwait(false);
+            await s1.RunAsync().ConfigureAwait(false);
 
             // Start stage 2
             Stage2 s2 = new Stage2(_requestor,
@@ -47,7 +46,7 @@ namespace HL.Client
                                     securityNumbe);
 
             // Run stage 2
-            await s2.RunStageAsync().ConfigureAwait(false);
+            await s2.RunAsync().ConfigureAwait(false);
 
             _isAuthenticated = true;
         }
@@ -57,12 +56,12 @@ namespace HL.Client
         /// <summary>
         /// Gets the account operations.
         /// </summary>
-        public virtual AccountOperations AccountOperations
-        {
-            get {
-                return _accountOperations;
-            }
-        }
+        public virtual AccountOperations AccountOperations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message operations.
+        /// </summary>
+        public virtual MessageOperations MessageOperations { get; set; }
         #endregion
 
         #region Constructor
@@ -72,7 +71,8 @@ namespace HL.Client
             _requestor = new Requestor();
 
             // Setup the operations 
-            _accountOperations = new AccountOperations(_requestor);
+            AccountOperations = new AccountOperations(_requestor);
+            MessageOperations = new MessageOperations(_requestor);
         }
         #endregion
     }

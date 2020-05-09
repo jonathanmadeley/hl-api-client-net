@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HL.Client.Entity
+namespace HL.Client.Entities
 {
     /// <summary>
     /// Defines an account entity.

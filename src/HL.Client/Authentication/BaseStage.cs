@@ -20,10 +20,20 @@ namespace HL.Client.Authentication
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Gets or sets the path.
+        /// </summary>
         public string Path { get; set; }
 
+        /// <summary>
+        /// Gets or sets the expected response.
+        /// </summary>
         public string ExpectedResponse { get; set; }
-        public HtmlDocument Document { get; set; }
+
+        /// <summary>
+        /// Gets or sets the document.
+        /// </summary>
+        internal HtmlDocument Document { get; set; }
         #endregion
 
         #region Methods
@@ -51,7 +61,10 @@ namespace HL.Client.Authentication
             return input.Attributes["value"].Value;
         }
 
-        // Build the fields to send.
+        /// <summary>
+        /// Build the form fields for a stage.
+        /// </summary>
+        /// <returns></returns>
         public abstract Dictionary<string, string> BuildFields();
 
         /// <summary>
@@ -76,7 +89,7 @@ namespace HL.Client.Authentication
         /// Run the stage.
         /// </summary>
         /// <returns></returns>
-        public async Task RunStageAsync()
+        public async Task RunAsync()
         {
             await LoadPage().ConfigureAwait(false);
 

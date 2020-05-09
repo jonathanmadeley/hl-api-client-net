@@ -1,5 +1,5 @@
 ﻿using System;
-namespace HL.Client.Entity
+namespace HL.Client.Entities
 {
     /// <summary>
     /// Defines a stock entity.

@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub forks](https://img.shields.io/nuget/dt/HargreavesLansdown.API.svg?style=flat-square)](https://www.nuget.org/packages/HargreavesLansdown.API/)
+
 # Hargreaves Lansdown API Client
 A simple API client for pulling information about your ISA's from Hargreaves Lansdown written in C#. This project uses the web portal for HL's services and outputs the results in a computer-readable format.
 
@@ -18,7 +21,9 @@ It is important to note that *your account will be locked if you enter invalid c
 
 ## Motivation
 
-The motivation for this client comes from the lack of an Open API provided by Hargreaves Lansdown for their regular customers. Automated scripts allow individuals and small traders alike to manage their investments with ease so it does seem rather odd not to offer an Open API like other companies.
+The motivation for this client comes from the lack of an Open API provided by Hargreaves Lansdown for their regular customers. Automated scripts allow individuals and small traders alike to manage their investments with ease; it does seem rather odd not to offer an Open API with functionality like that of AJ Bell.
+
+The main reason behind building this project is portfolio rebalancing at the end of each period.
 
 
 ## Contributions
@@ -28,4 +33,4 @@ I have only added limited functionality to this client library, to service the n
 
 ## Licensing
 
-This software is provided under a GNU General Public License.
+This software is provided under a MIT license.

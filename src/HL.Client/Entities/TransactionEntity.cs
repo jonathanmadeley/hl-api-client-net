@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HL.Client.Entity
+namespace HL.Client.Entities
 {
     /// <summary>
     /// Defines a capital transaction entity.

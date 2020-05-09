@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using HL.Client;
+using HL.Client.Entities;
 
 namespace HL.Client.Example
 {
     class Program
     {
-        static async Task MainAsync(string[] args)
+        static async Task Main(string[] args)
         {
             string username = Environment.GetEnvironmentVariable("HL_USERNAME");
             string password = Environment.GetEnvironmentVariable("HL_PASSWORD");
@@ -16,20 +17,43 @@ namespace HL.Client.Example
             // Load client
             Client client = new Client();
 
-            // Start
+            // Authenticate client
             await client.AuthenticateAsync(username, password, birthday, securityCode);
 
-            // Client is now authenticated.
-            var accounts = await client.AccountOperations.ListAsync();
-            var stocks = await client.AccountOperations.ListStocksAsync(accounts[0].Id);
-            var transactions = await client.AccountOperations.ListTransactions(accounts[0].Id);
+            AccountEntity[] accounts = await client.AccountOperations.ListAsync();
+
+            foreach (AccountEntity account in accounts)
+            {
+                // Account information
+                Console.WriteLine($"- Account: {account.Name}");
+                Console.WriteLine($"        Current Value: {account.TotalValue}");
+                Console.WriteLine($"        Total Share Value: {account.StockValue}");
+                Console.WriteLine($"        Cash Held on Account: {account.CashValue}");
+
+                // Get information for each stock.
+                Console.WriteLine("  Stocks & Funds");
+                StockEntity[] stocks = await client.AccountOperations.ListStocksAsync(account.Id);
+                foreach(StockEntity stock in stocks)
+                {
+                    Console.WriteLine($"    - Stock Holding: {stock.Name}");
+                    Console.WriteLine($"        Current Value: {stock.Value}");
+                    Console.WriteLine($"        Bought at: {stock.Cost}");
+
+                    if (stock.GainsLoss.Percentage > 0)
+                        Console.WriteLine($"        You have made a PROFIT of {stock.GainsLoss.Pounds} to date.");
+                    else if (stock.GainsLoss.Percentage == 0)
+                        Console.WriteLine($"        You have not made a profit or loss to date.");
+                    else
+                        Console.WriteLine($"        You have made a LOSS of {stock.GainsLoss.Pounds} to date.");
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadLine();
 
             return;
-        }
-
-        public static void Main(string[] args)
-        {
-            MainAsync(args).Wait();
         }
     }
 }

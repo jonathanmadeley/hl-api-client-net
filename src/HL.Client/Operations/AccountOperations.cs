@@ -1,16 +1,15 @@
-﻿using HL.Client.Entity;
+﻿using HL.Client.Entities;
 using HtmlAgilityPack;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HL.Client.Operations
 {
     /// <summary>
-    /// Defines the possible account operations.
+    /// Defines the account operations.
     /// </summary>
     public class AccountOperations
     {
@@ -23,7 +22,7 @@ namespace HL.Client.Operations
         /// Gets a list of all accounts.
         /// </summary>
         /// <returns></returns>
-        public async Task<AccountEntity[]> ListAsync()
+        public async Task<AccountEntity[]> ListAsync(CancellationToken cancellationToken = default)
         {
             // Make request
             var response = await _requestor.GetAsync("my-accounts/portfolio_overview");
@@ -58,15 +57,13 @@ namespace HL.Client.Operations
             return accounts;
         }
 
-
         /// <summary>
-        /// Gets a list of all stocks on an account.
+        /// List stocks for an account.
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns></returns>
-        public async Task<StockEntity[]> ListStocksAsync(int accountId)
+        public async Task<StockEntity[]> ListStocksAsync(int accountId, CancellationToken cancellationToken = default)
         {
-            // Make request
             var response = await _requestor.GetAsync($"my-accounts/account_summary/account/{accountId}");
 
             if (!response.IsSuccessStatusCode)
@@ -78,21 +75,18 @@ namespace HL.Client.Operations
                 throw new Exception($"Unable to get stock for account: {accountId}");
             }
 
-            // Convert into a HTML doc
             HtmlDocument doc = new HtmlDocument();
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
-            // Get the table
             var table = doc.DocumentNode.Descendants("table").Where(x => x.Id == "holdings-table").SingleOrDefault();
             var body = table.SelectSingleNode("tbody");
             var rows = body.Descendants("tr").ToArray();
 
             // Convert into stock holding entities
             StockEntity[] stocks = new StockEntity[rows.Length];
-            for(int i = 0; i < stocks.Length; i++)
+            for (int i = 0; i < stocks.Length; i++)
             {
-                // Get the columns in the rows
                 var columns = rows[i].Descendants("td").ToArray();
 
                 stocks[i] = new StockEntity
@@ -115,11 +109,47 @@ namespace HL.Client.Operations
         }
 
         /// <summary>
-        /// Gets a list of transactions for an account.
+        /// Gets the cash summary for an account.
         /// </summary>
-        /// <param name="accountId"></param>
+        /// <param name="accountId">The account Id.</param>
         /// <returns></returns>
-        public async Task<TransactionEntity[]> ListTransactions(int accountId)
+        public async Task<CashSummaryEntity> GetCashSummaryAsync(int accountId)
+        {
+            var response = await _requestor.GetAsync($"my-accounts/cash/account/{accountId}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Check if 404
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    throw new ArgumentException("Unable to find account.", "accountId");
+
+                throw new Exception($"Unable to get cash summary for account: {accountId}");
+            }
+
+            HtmlDocument doc = new HtmlDocument();
+            string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
+            doc.LoadHtml(html);
+
+            var table = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("cash-generic-table")).SingleOrDefault();
+            var body = table.SelectSingleNode("tbody");
+            var rows = body.Descendants("tr").ToArray();
+            var footer = table.SelectSingleNode("tfoot").SelectSingleNode("tr");
+
+            return new CashSummaryEntity
+            {
+                CashOnCapitalAccount = decimal.Parse(rows[0].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
+                IncomeLoyaltyBonus = decimal.Parse(rows[1].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
+                FixedRateOffers = decimal.Parse(rows[2].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
+                TotalCash = decimal.Parse(footer.SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
+            };
+        }
+
+        /// <summary>
+        /// List transactions for an account.
+        /// </summary>
+        /// <param name="accountId">The account Id.</param>
+        /// <returns></returns>
+        public async Task<TransactionEntity[]> ListTransactionsAsync(int accountId, CancellationToken cancellationToken = default)
         {
             // Make request
             var response = await _requestor.GetAsync($"my-accounts/capital-transaction-history/account/{accountId}");
@@ -154,7 +184,7 @@ namespace HL.Client.Operations
                 {
                     TradeDate = DateTime.Parse(columns[0].InnerText.Trim('\r', '\n')),
                     SettleDate = DateTime.Parse(columns[1].InnerText.Trim('\r', '\n')),
-                    
+
                     // Determine the reference
                     Reference = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").InnerText.Trim('\r', '\n') : columns[2].InnerText.Trim('\r', '\n'),
                     ReferenceLink = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").Attributes.SingleOrDefault(a => a.Name == "href").Value : null,

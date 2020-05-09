@@ -19,6 +19,7 @@ namespace HL.Client.Authentication
         #endregion
 
         #region Methods
+        /// <inheritdoc/>
         public override Dictionary<string, string> BuildFields()
         {
             // Determine the inputs needed from the security number
