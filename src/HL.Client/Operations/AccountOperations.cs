@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace HL.Client.Operations
 {
@@ -46,7 +47,7 @@ namespace HL.Client.Operations
                 accounts[i] = new AccountEntity
                 {
                     Id = int.Parse(columns[0].SelectSingleNode("a").Attributes.Single(x => x.Name == "href").Value.Remove(0, Constants.BaseUrl.Length).Split('/')[3]),
-                    Name = columns[0].SelectSingleNode("a").InnerText.Trim('\n', '\r').Trim(),
+                    Name = HttpUtility.HtmlDecode(columns[0].SelectSingleNode("a").InnerText.Trim('\n', '\r').Trim()),
                     StockValue = decimal.Parse(columns[1].SelectSingleNode("a").InnerText.Split('£')[1]),
                     CashValue = decimal.Parse(columns[2].InnerText.Split('£')[1]),
                     TotalValue = decimal.Parse(columns[3].SelectSingleNode("strong").InnerText.Split('£')[1]),
@@ -92,7 +93,7 @@ namespace HL.Client.Operations
                 stocks[i] = new StockEntity
                 {
                     Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
-                    Name = columns[0].SelectSingleNode("a").InnerText.Trim('\r', '\n').Trim(),
+                    Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
                     UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
                     Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
                     Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
