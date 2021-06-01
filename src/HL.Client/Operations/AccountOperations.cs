@@ -1,6 +1,7 @@
 ﻿using HL.Client.Entities;
 using HtmlAgilityPack;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -63,7 +64,7 @@ namespace HL.Client.Operations
         /// </summary>
         /// <param name="accountId"></param>
         /// <returns></returns>
-        public async Task<StockEntity[]> ListStocksAsync(int accountId, CancellationToken cancellationToken = default)
+        public async Task<List<StockEntity>> ListStocksAsync(int accountId, CancellationToken cancellationToken = default)
         {
             var response = await _requestor.GetAsync($"my-accounts/account_summary/account/{accountId}");
 
@@ -80,33 +81,36 @@ namespace HL.Client.Operations
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
-            var table = doc.DocumentNode.Descendants("table").Where(x => x.Id == "holdings-table").SingleOrDefault();
-            var body = table.SelectSingleNode("tbody");
-            var rows = body.Descendants("tr").ToArray();
+			List<StockEntity> stocks = new List<StockEntity>();
 
-            // Convert into stock holding entities
-            StockEntity[] stocks = new StockEntity[rows.Length];
-            for (int i = 0; i < stocks.Length; i++)
-            {
-                var columns = rows[i].Descendants("td").ToArray();
+			var table = doc.DocumentNode.Descendants("table").Where(x => x.Id == "holdings-table").SingleOrDefault();
+			var body = table.SelectSingleNode("tbody");
+			if (body != null && body.Descendants("tr").Count() > 0)
+			{
+				var rows = body.Descendants("tr").ToArray();
 
-                stocks[i] = new StockEntity
-                {
-                    Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
-                    Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
-                    UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
-                    Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                    Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
-                    Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                    GainsLoss = new GainsLossEntity
-                    {
-                        Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                        Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
-                    }
-                };
-            }
+				// Convert into stock holding entities
+				for (int i = 0; i < rows.Length; i++)
+				{
+					var columns = rows[i].Descendants("td").ToArray();
+					stocks.Add(new StockEntity
+					{
+						Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
+						Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
+						UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
+						Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+						Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
+						Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+						GainsLoss = new GainsLossEntity
+						{
+							Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+							Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
+						}
+					});
+				}
+			}
 
-            return stocks;
+			return stocks;
         }
 
         /// <summary>

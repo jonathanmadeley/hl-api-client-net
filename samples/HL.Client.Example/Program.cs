@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HL.Client;
 using HL.Client.Entities;
@@ -32,7 +33,7 @@ namespace HL.Client.Example
 
                 // Get information for each stock.
                 Console.WriteLine("  Stocks & Funds");
-                StockEntity[] stocks = await client.AccountOperations.ListStocksAsync(account.Id);
+                List<StockEntity> stocks = await client.AccountOperations.ListStocksAsync(account.Id);
                 foreach(StockEntity stock in stocks)
                 {
                     Console.WriteLine($"    - Stock Holding: {stock.Name}");

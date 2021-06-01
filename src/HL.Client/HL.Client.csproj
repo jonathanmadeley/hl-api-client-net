@@ -15,7 +15,7 @@ This is not an official package.</Description>
     <PackageIconUrl />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/jonathanmadeley/hl-api-client-net</PackageProjectUrl>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
