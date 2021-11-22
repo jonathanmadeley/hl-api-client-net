@@ -39,7 +39,7 @@ namespace HL.Client.Operations
 
             // For each row, convert into account model.
             AccountEntity[] accounts = new AccountEntity[rows.Count()];
-            for(int i = 0; i < accounts.Length; i++)
+            for (int i = 0; i < accounts.Length; i++)
             {
                 // Get the columns in the rows
                 var columns = rows[i].Descendants("td").ToArray();
@@ -81,36 +81,36 @@ namespace HL.Client.Operations
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
-			List<StockEntity> stocks = new List<StockEntity>();
+            List<StockEntity> stocks = new List<StockEntity>();
 
-			var table = doc.DocumentNode.Descendants("table").Where(x => x.Id == "holdings-table").SingleOrDefault();
-			var body = table.SelectSingleNode("tbody");
-			if (body != null && body.Descendants("tr").Count() > 0)
-			{
-				var rows = body.Descendants("tr").ToArray();
+            var rows = doc
+                .DocumentNode
+                .Descendants("table")
+                .Where(x => x.HasClass("holdings-table"))
+                .SelectMany(table => table.SelectSingleNode("tbody").Descendants("tr"))
+                .ToArray();
 
-				// Convert into stock holding entities
-				for (int i = 0; i < rows.Length; i++)
-				{
-					var columns = rows[i].Descendants("td").ToArray();
-					stocks.Add(new StockEntity
-					{
-						Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
-						Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
-						UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
-						Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-						Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
-						Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-						GainsLoss = new GainsLossEntity
-						{
-							Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-							Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
-						}
-					});
-				}
-			}
+            // Convert into stock holding entities
+            for (int i = 0; i < rows.Length; i++)
+            {
+                var columns = rows[i].Descendants("td").ToArray();
+                stocks.Add(new StockEntity
+                {
+                    Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
+                    Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
+                    UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
+                    Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                    Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
+                    Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                    GainsLoss = new GainsLossEntity
+                    {
+                        Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                        Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
+                    }
+                });
+            }
 
-			return stocks;
+            return stocks;
         }
 
         /// <summary>
