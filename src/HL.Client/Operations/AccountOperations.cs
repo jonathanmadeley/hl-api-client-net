@@ -94,10 +94,12 @@ namespace HL.Client.Operations
             for (int i = 0; i < rows.Length; i++)
             {
                 var columns = rows[i].Descendants("td").ToArray();
+                var nameAndType = columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n');
                 stocks.Add(new StockEntity
                 {
                     Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
-                    Name = HttpUtility.HtmlDecode(columns[1].InnerText.Trim('\r', '\n').Trim().Split('\n')[0]),
+                    Name = HttpUtility.HtmlDecode(nameAndType[0]),
+                    UnitType = HttpUtility.HtmlDecode(nameAndType[nameAndType.Length-1]).Trim(),
                     UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
                     Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
                     Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),

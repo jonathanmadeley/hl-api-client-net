@@ -17,6 +17,11 @@ namespace HL.Client.Entities
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the unit type.
+        /// </summary>
+        public string UnitType { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of units held.
         /// </summary>
         public decimal UnitsHeld { get; set; }
