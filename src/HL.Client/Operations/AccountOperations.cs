@@ -2,6 +2,7 @@
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace HL.Client.Operations
     public class AccountOperations
     {
         #region Fields
+        private static readonly CultureInfo gbCulture = CultureInfo.GetCultureInfo("en-GB");
         private Requestor _requestor;
         #endregion
 
@@ -23,7 +25,7 @@ namespace HL.Client.Operations
         /// <summary>
         /// Gets a list of all accounts.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The list of accounts</returns>
         public async Task<AccountEntity[]> ListAsync(CancellationToken cancellationToken = default)
         {
             // Make request
@@ -59,10 +61,10 @@ namespace HL.Client.Operations
                 {
                     Id = int.Parse(columns[0].SelectSingleNode("a").Attributes.Single(x => x.Name == "href").Value.Remove(0, Constants.BaseUrl.Length).Split('/')[3]),
                     Name = HttpUtility.HtmlDecode(columns[0].SelectSingleNode("a").InnerText.Trim('\n', '\r').Trim()),
-                    StockValue = decimal.Parse(columns[1].SelectSingleNode("a").InnerText.Split('£')[1]),
-                    CashValue = decimal.Parse(columns[2].InnerText.Split('£')[1]),
-                    TotalValue = decimal.Parse(columns[3].SelectSingleNode("strong").InnerText.Split('£')[1]),
-                    Available = decimal.Parse(columns[4].SelectSingleNode("a").InnerText.Split('£')[1])
+                    StockValue = ParseCurrency(columns[1].SelectSingleNode("a").InnerText),
+                    CashValue = ParseCurrency(columns[2].InnerText),
+                    TotalValue = ParseCurrency(columns[3].SelectSingleNode("strong").InnerText),
+                    Available = ParseCurrency(columns[4].SelectSingleNode("a").InnerText),
                 };
             }
 
@@ -72,8 +74,8 @@ namespace HL.Client.Operations
         /// <summary>
         /// List stocks for an account.
         /// </summary>
-        /// <param name="accountId"></param>
-        /// <returns></returns>
+        /// <param name="accountId">The account ID</param>
+        /// <returns>The stocks within the specified account</returns>
         public async Task<List<StockEntity>> ListStocksAsync(int accountId, CancellationToken cancellationToken = default)
         {
             var response = await _requestor.GetAsync($"my-accounts/account_summary/account/{accountId}");
@@ -120,14 +122,14 @@ namespace HL.Client.Operations
                     Id = columns[0].SelectSingleNode("a").Attributes.SingleOrDefault(x => x.Name == "href").Value.Remove(0, $"{Constants.BaseUrl}".Length).Split('/')[3],
                     Name = HttpUtility.HtmlDecode(nameAndType[0]),
                     UnitType = HttpUtility.HtmlDecode(nameAndType[nameAndType.Length-1]).Trim(),
-                    UnitsHeld = decimal.Parse(columns[2].InnerText.Trim('\r', '\n').Trim()),
-                    Price = decimal.Parse(columns[3].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                    Value = decimal.Parse(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText.Trim('\r', 'n').Trim()),
-                    Cost = decimal.Parse(columns[5].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
+                    UnitsHeld = ParseDecimal(columns[2].InnerText),
+                    Price = ParseDecimal(columns[3].SelectSingleNode("span").InnerText),
+                    Value = ParseDecimal(columns[4].SelectSingleNode("span").SelectSingleNode("span").InnerText),
+                    Cost = ParseDecimal(columns[5].SelectSingleNode("span").InnerText),
                     GainsLoss = new GainsLossEntity
                     {
-                        Pounds = decimal.Parse(columns[16].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim()),
-                        Percentage = decimal.Parse(columns[17].SelectSingleNode("span").InnerText.Trim('\r', '\n').Trim())
+                        Pounds = ParseDecimal(columns[16].SelectSingleNode("span").InnerText),
+                        Percentage = ParseDecimal(columns[17].SelectSingleNode("span").InnerText)
                     }
                 });
             }
@@ -225,8 +227,27 @@ namespace HL.Client.Operations
 
             return transactions;
         }
-        #endregion
 
+        /// <summary>
+        /// Parse a currency value using UK formatting
+        /// </summary>
+        /// <param name="str">String containing a currency value</param>
+        /// <returns>The currency value</returns>
+        private static decimal ParseCurrency(string str)
+        {
+            return decimal.Parse(str, NumberStyles.Currency, gbCulture);
+        }
+
+        /// <summary>
+        /// Parse a number using UK formatting
+        /// </summary>
+        /// <param name="str">String containing a number</param>
+        /// <returns>The number value</returns>
+        private static decimal ParseDecimal(string str)
+        {
+            return decimal.Parse(str, NumberStyles.Number, gbCulture);
+        }
+        #endregion
         #region Constructor
         public AccountOperations(Requestor requestor)
         {
