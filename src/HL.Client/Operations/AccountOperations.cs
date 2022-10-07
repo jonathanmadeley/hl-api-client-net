@@ -32,6 +32,16 @@ namespace HL.Client.Operations
             HtmlDocument doc = new HtmlDocument();
             doc.Load(await response.Content.ReadAsStreamAsync().ConfigureAwait(false));
 
+            return ListAccounts(doc);
+        }
+
+        /// <summary>
+        /// Parse the document to extract the list of accounts
+        /// </summary>
+        /// <param name="doc">The document containing account information</param>
+        /// <returns>The list of accounts</returns>
+        public static AccountEntity[] ListAccounts(HtmlDocument doc)
+        { 
             // Get table
             var table = doc.DocumentNode.Descendants("table").Where(x => x.Id == "portfolio").SingleOrDefault();
             var body = table.SelectSingleNode("tbody");
