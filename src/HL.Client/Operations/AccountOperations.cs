@@ -91,6 +91,16 @@ namespace HL.Client.Operations
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
+            return ListStocks(doc);
+        }
+
+        /// <summary>
+        /// Parse the document to extract the stock information
+        /// </summary>
+        /// <param name="doc">The document containing stock information</param>
+        /// <returns>The stocks within the specified account</returns>
+        public static List<StockEntity> ListStocks(HtmlDocument doc)
+        {
             List<StockEntity> stocks = new List<StockEntity>();
 
             var rows = doc
