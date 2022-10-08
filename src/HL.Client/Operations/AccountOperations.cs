@@ -141,7 +141,7 @@ namespace HL.Client.Operations
         /// Gets the cash summary for an account.
         /// </summary>
         /// <param name="accountId">The account Id.</param>
-        /// <returns></returns>
+        /// <returns>The cash summary</returns>
         public async Task<CashSummaryEntity> GetCashSummaryAsync(int accountId)
         {
             var response = await _requestor.GetAsync($"my-accounts/cash/account/{accountId}");
@@ -159,6 +159,16 @@ namespace HL.Client.Operations
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
+            return GetCashSummary(doc);
+        }
+
+        /// <summary>
+        /// Parse the document to extract the cash summary
+        /// </summary>
+        /// <param name="doc">The document containing the summary information</param>
+        /// <returns>The cash summary</returns>
+        public static CashSummaryEntity GetCashSummary(HtmlDocument doc)
+        {
             var table = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("cash-generic-table")).SingleOrDefault();
             var body = table.SelectSingleNode("tbody");
             var rows = body.Descendants("tr").ToArray();
@@ -166,10 +176,10 @@ namespace HL.Client.Operations
 
             return new CashSummaryEntity
             {
-                CashOnCapitalAccount = decimal.Parse(rows[0].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
-                IncomeLoyaltyBonus = decimal.Parse(rows[1].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
-                FixedRateOffers = decimal.Parse(rows[2].SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
-                TotalCash = decimal.Parse(footer.SelectNodes("td").Last().InnerText.Trim().TrimStart('£')),
+                CashOnCapitalAccount = ParseCurrency(rows[0].SelectNodes("td").Last().InnerText),
+                IncomeLoyaltyBonus = ParseCurrency(rows[1].SelectNodes("td").Last().InnerText),
+                FixedRateOffers = ParseCurrency(rows[2].SelectNodes("td").Last().InnerText),
+                TotalCash = ParseCurrency(footer.SelectNodes("td").Last().InnerText),
             };
         }
 

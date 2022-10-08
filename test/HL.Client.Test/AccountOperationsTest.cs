@@ -71,6 +71,27 @@ namespace HL.Client.Test
             Assert.AreEqual(17.0m, stocks[0].GainsLoss.Percentage);
         }
 
+        [TestMethod]
+        public void ParseCashSummary()
+        {
+            var doc = new HtmlDocument();
+            var tableBuilder = new HtmlTableBuilder { Class = "cash-generic-table" };
+
+            tableBuilder.AddRow("£1.00");
+            tableBuilder.AddRow("£2.00");
+            tableBuilder.AddRow("£3.00");
+            tableBuilder.AddFooter("£4.00");
+
+            doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
+
+            var summary = AccountOperations.GetCashSummary(doc);
+
+            Assert.AreEqual(1.0m, summary.CashOnCapitalAccount);
+            Assert.AreEqual(2.0m, summary.IncomeLoyaltyBonus);
+            Assert.AreEqual(3.0m, summary.FixedRateOffers);
+            Assert.AreEqual(4.0m, summary.TotalCash);
+        }
+
         /// <summary>
         /// Create a link to a specific account
         /// </summary>

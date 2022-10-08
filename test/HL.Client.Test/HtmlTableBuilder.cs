@@ -8,11 +8,13 @@ namespace HL.Client.Test
 {
     internal class HtmlTableBuilder
     {
-        private readonly StringWriter _writer;
+        private readonly StringWriter _body;
+        private readonly StringWriter _footer;
 
         public HtmlTableBuilder()
         {
-            this._writer = new StringWriter();
+            this._body = new StringWriter();
+            this._footer = new StringWriter();
             this.Id = string.Empty;
             this.Class = string.Empty;
         }
@@ -33,14 +35,31 @@ namespace HL.Client.Test
         /// <param name="args"></param>
         public HtmlTableBuilder AddRow(params string[] args)
         {
-            _writer.Write(@"<tr> ");
+            _body.Write(@"<tr> ");
 
-            foreach(var cell in args)
+            foreach (var cell in args)
             {
-                _writer.Write(@"<td>{0}</td> ", cell);
+                _body.Write(@"<td>{0}</td> ", cell);
             }
 
-            _writer.WriteLine(@"</tr>");
+            _body.WriteLine(@"</tr>");
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
+        public HtmlTableBuilder AddFooter(params string[] args)
+        {
+            _footer.Write(@"<tr> ");
+
+            foreach (var cell in args)
+            {
+                _footer.Write(@"<td>{0}</td> ", cell);
+            }
+
+            _footer.WriteLine(@"</tr>");
             return this;
         }
 
@@ -62,8 +81,17 @@ namespace HL.Client.Test
             }
 
             sw.WriteLine("> <tbody>");
-            sw.WriteLine(this._writer);
-            sw.WriteLine("</tbody> </table>");
+            sw.WriteLine(this._body);
+            sw.WriteLine("</tbody>");
+
+            if (this._footer.ToString() != string.Empty)
+            {
+                sw.WriteLine("<tfoot>");
+                sw.WriteLine(this._footer);
+                sw.WriteLine("</tfoot>");
+            }
+
+            sw.WriteLine("</table>");
 
             return sw.ToString();
         }
