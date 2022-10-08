@@ -7,28 +7,24 @@ namespace HL.Client.Test
     [TestClass]
     public class AccountOperationsTest
     {
+        private const string HtmlBegin = "<html> <head></head> <body>";
+        private const string HtmlEnd = "</body> </html>";
+
         [TestMethod]
         public void ParseOneAccount()
         {
             var doc = new HtmlDocument();
-            var s = @"
-                <html>
-                <head>
-                </head>
-                <body>
-                <table id=""portfolio"">
-                <tbody><tr>
-                    <td><a href=""https://online.hl.co.uk/my-accounts/account_summary/account/999"">0</a></td> 
-                    <td><a href=""https://online.hl.co.uk/my-accounts/account_summary/account/999"">£1.00</a></td> 
-                    <td>£2.00</td> 
-                    <td><strong>£3.00</strong></td> 
-                    <td><a href=""https://online.hl.co.uk/my-accounts/account_summary/account/999"">£4.00</a></td>
-                </tr></tbody>
-                </table>
-                </body>
-                </html>";
+            var tableBuilder = new HtmlTableBuilder { Id = "portfolio" };
 
-            doc.Load(new StringReader(s));
+            tableBuilder.AddRow(
+                AccountLink(999, "0"),
+                AccountLink(999, "£1.00"),
+                "£2.00",
+                "<strong>£3.00</strong>",
+                AccountLink(999, "£4.00"));
+
+
+            doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
 
             var accounts = AccountOperations.ListAccounts(doc);
 
@@ -45,34 +41,21 @@ namespace HL.Client.Test
         public void ParseOneStock()
         {
             var doc = new HtmlDocument();
-            var s = @"
-                <html>
-                <head>
-                </head>
-                <body>
-                <table class=""holdings-table"">
-                <tbody><tr>
-                    <td><a href=""https://online.hl.co.uk/my-accounts/account_summary/account/999"">0</a></td> 
-                    <td><a href=""https://online.hl.co.uk/my-accounts/account_summary/account/999"">stock" + '\n' + @"type</a></td> 
-                    <td>2</td> 
-                    <td><span>3.00</span></td> 
-                    <td><span><span>4.00</span></span></td>
-                    <td><span>5.00</span></td>
+            var tableBuilder = new HtmlTableBuilder { Class = "holdings-table" };
 
-                    <td></td> <td></td>
-                    <td></td> <td></td>
-                    <td></td> <td></td>
-                    <td></td> <td></td>
-                    <td></td> <td></td>
+            tableBuilder.AddRow(
+                AccountLink(999, "0"),
+                AccountLink(999, "stock" + '\n' + "type"),
+                "2",
+                Span("3.00"),
+                Span(Span("4.00")),
+                Span("5.00"),
+                "", "", "", "", "",
+                "", "", "", "", "",
+                Span("16.00"),
+                Span("17.00"));
 
-                    <td><span>16.00</span></td>
-                    <td><span>17.00</span></td>
-                </tr></tbody>
-                </table>
-                </body>
-                </html>";
-
-            doc.Load(new StringReader(s));
+            doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
 
             var stocks = AccountOperations.ListStocks(doc);
 
@@ -86,6 +69,31 @@ namespace HL.Client.Test
             Assert.AreEqual(5.0m, stocks[0].Cost);
             Assert.AreEqual(16.0m, stocks[0].GainsLoss.Pounds);
             Assert.AreEqual(17.0m, stocks[0].GainsLoss.Percentage);
+        }
+
+        /// <summary>
+        /// Create a link to a specific account
+        /// </summary>
+        /// <param name="id">The account ID</param>
+        /// <param name="name">The account name</param>
+        /// <returns>The link</returns>
+        private static string AccountLink(int id, string name)
+        {
+            return string.Format(
+                "<a href=\"{0}my-accounts/account-summary/account/{1}\">{2}</a>",
+                Constants.BaseUrl,
+                id,
+                name);
+        }
+
+        /// <summary>
+        /// Wrap a string in a span tag
+        /// </summary>
+        /// <param name="str">The string wrap</param>
+        /// <returns>The span</returns>
+        private static string Span(string str)
+        {
+            return "<span>" + str + "</span>";
         }
     }
 }
