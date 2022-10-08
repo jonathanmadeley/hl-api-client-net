@@ -1,14 +1,35 @@
+using System.Globalization;
 using HL.Client.Operations;
 using HtmlAgilityPack;
 using NUnit.Framework;
 
 namespace HL.Client.Test
 {
-    [TestFixture]
+    [TestFixtureSource(nameof(Cultures))]
     public class AccountOperationsTest
     {
         private const string HtmlBegin = "<html> <head></head> <body>";
         private const string HtmlEnd = "</body> </html>";
+
+        private static readonly object[] Cultures =
+        {
+            CultureInfo.GetCultureInfo("en-GB"),
+            CultureInfo.GetCultureInfo("en-US"),
+            CultureInfo.GetCultureInfo("nl-NL"),
+        };
+
+        private readonly CultureInfo culture;
+
+        public AccountOperationsTest(CultureInfo culture)
+        {
+            this.culture = culture;
+        }
+
+        [OneTimeSetUp]
+        public void SetUp()
+        {
+            Thread.CurrentThread.CurrentCulture = culture;
+        }
 
         [Test]
         public void ParseOneAccount()
