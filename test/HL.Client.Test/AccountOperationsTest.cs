@@ -1,16 +1,16 @@
 using HL.Client.Operations;
 using HtmlAgilityPack;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace HL.Client.Test
 {
-    [TestClass]
+    [TestFixture]
     public class AccountOperationsTest
     {
         private const string HtmlBegin = "<html> <head></head> <body>";
         private const string HtmlEnd = "</body> </html>";
 
-        [TestMethod]
+        [Test]
         public void ParseOneAccount()
         {
             var doc = new HtmlDocument();
@@ -37,7 +37,7 @@ namespace HL.Client.Test
             Assert.AreEqual(4.0m, accounts[0].Available);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseOneStock()
         {
             var doc = new HtmlDocument();
@@ -71,7 +71,7 @@ namespace HL.Client.Test
             Assert.AreEqual(17.0m, stocks[0].GainsLoss.Percentage);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseCashSummary()
         {
             var doc = new HtmlDocument();
@@ -92,7 +92,7 @@ namespace HL.Client.Test
             Assert.AreEqual(4.0m, summary.TotalCash);
         }
 
-        [TestMethod]
+        [Test]
         public void ParseOneTransaction()
         {
             var doc = new HtmlDocument();
