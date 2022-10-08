@@ -207,6 +207,16 @@ namespace HL.Client.Operations
             string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
             doc.LoadHtml(html);
 
+            return ListTransactions(doc);
+        }
+
+        /// <summary>
+        /// Parse the document to extract the transactions
+        /// </summary>
+        /// <param name="doc">The document containing the transactions</param>
+        /// <returns>The transactions</returns>
+        public static TransactionEntity[] ListTransactions(HtmlDocument doc)
+        {
             // Get the table
             var table = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("transaction-history-table")).SingleOrDefault();
             var body = table.SelectSingleNode("tbody");
@@ -221,21 +231,31 @@ namespace HL.Client.Operations
 
                 transactions[i] = new TransactionEntity()
                 {
-                    TradeDate = DateTime.Parse(columns[0].InnerText.Trim('\r', '\n')),
-                    SettleDate = DateTime.Parse(columns[1].InnerText.Trim('\r', '\n')),
+                    TradeDate = ParseDateTime(columns[0].InnerText.Trim('\r', '\n')),
+                    SettleDate = ParseDateTime(columns[1].InnerText.Trim('\r', '\n')),
 
                     // Determine the reference
                     Reference = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").InnerText.Trim('\r', '\n') : columns[2].InnerText.Trim('\r', '\n'),
                     ReferenceLink = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").Attributes.SingleOrDefault(a => a.Name == "href").Value : null,
 
                     Description = columns[3].InnerText.Trim('\r', '\n').Trim(),
-                    UnitCost = decimal.TryParse(columns[4].InnerText.Trim('\r', '\n'), out decimal unitPrice) ? unitPrice : (decimal?)null,
-                    Quantity = decimal.TryParse(columns[5].InnerText.Trim('\r', '\n'), out decimal quantity) ? quantity : (decimal?)null,
-                    Value = decimal.TryParse(columns[6].InnerText.Trim('\r', '\n'), out decimal value) ? value : 0
+                    UnitCost = ParseDecimalOrNull(columns[4].InnerText.Trim('\r', '\n')),
+                    Quantity = ParseDecimalOrNull(columns[5].InnerText.Trim('\r', '\n')),
+                    Value = ParseDecimalOrDefault(columns[6].InnerText.Trim('\r', '\n'), 1.0m)
                 };
             }
 
             return transactions;
+        }
+
+        /// <summary>
+        /// Parse the date and time using UK formatting
+        /// </summary>
+        /// <param name="str">String containing a date and possibly a time</param>
+        /// <returns>The date and time</returns>
+        private static DateTime ParseDateTime(string str)
+        {
+            return DateTime.Parse(str, gbCulture, DateTimeStyles.AllowWhiteSpaces);
         }
 
         /// <summary>
@@ -256,6 +276,41 @@ namespace HL.Client.Operations
         private static decimal ParseDecimal(string str)
         {
             return decimal.Parse(str, NumberStyles.Number, gbCulture);
+        }
+
+        /// <summary>
+        /// Try to parse a number using UK formatting and return null if the parsing fails
+        /// </summary>
+        /// <param name="str">String containing a number</param>
+        /// <returns>The number value or null</returns>
+        private static decimal? ParseDecimalOrNull(string str)
+        {
+            decimal value;
+
+            if (decimal.TryParse(str, NumberStyles.Number, gbCulture, out value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Try to parse a number using UK formatting and return a default value if the parsing fails
+        /// </summary>
+        /// <param name="str">String containing a number</param>
+        /// <param name="defaultValue">The value if parsing fails</param>
+        /// <returns>The number value</returns>
+        private static decimal ParseDecimalOrDefault(string str, decimal defaultValue)
+        {
+            decimal value;
+
+            if(decimal.TryParse(str, NumberStyles.Number, gbCulture, out value))
+            {
+                return value;
+            }
+
+            return defaultValue;
         }
         #endregion
         #region Constructor

@@ -92,6 +92,36 @@ namespace HL.Client.Test
             Assert.AreEqual(4.0m, summary.TotalCash);
         }
 
+        [TestMethod]
+        public void ParseOneTransaction()
+        {
+            var doc = new HtmlDocument();
+            var tableBuilder = new HtmlTableBuilder { Class = "transaction-history-table" };
+
+            tableBuilder.AddRow(
+                "15/10/2020", 
+                "20/10/2010", 
+                "<a href=\"https://example.com/random-url/\">a_name</a>", 
+                "This is a description", 
+                "5.00", 
+                "6.00", 
+                "7.00");
+
+            doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
+
+            var transactions = AccountOperations.ListTransactions(doc);
+
+            Assert.AreEqual(1, transactions.Length);
+            Assert.AreEqual(new DateTime(2020, 10, 15), transactions[0].TradeDate);
+            Assert.AreEqual(new DateTime(2010, 10, 20), transactions[0].SettleDate);
+            Assert.AreEqual("a_name", transactions[0].Reference);
+            Assert.AreEqual("https://example.com/random-url/", transactions[0].ReferenceLink);
+            Assert.AreEqual("This is a description", transactions[0].Description);
+            Assert.AreEqual(5.0m, transactions[0].UnitCost);
+            Assert.AreEqual(6.0m, transactions[0].Quantity);
+            Assert.AreEqual(7.0m, transactions[0].Value);
+        }
+
         /// <summary>
         /// Create a link to a specific account
         /// </summary>
