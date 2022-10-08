@@ -13,9 +13,10 @@ namespace HL.Client.Test
 
         private static readonly object[] Cultures =
         {
-            CultureInfo.GetCultureInfo("en-GB"),
-            CultureInfo.GetCultureInfo("en-US"),
-            CultureInfo.GetCultureInfo("nl-NL"),
+            CultureInfo.GetCultureInfo("en-GB"), // This the expected culture
+            CultureInfo.GetCultureInfo("en-US"), // Very similar except the date format is mm/dd/yyyy
+            CultureInfo.GetCultureInfo("nl-NL"), // Similar except numbers are 000.000,00
+            CultureInfo.GetCultureInfo("zh-Hant-TW"), // Uses a different calendar
         };
 
         private readonly CultureInfo culture;
@@ -28,7 +29,7 @@ namespace HL.Client.Test
         [OneTimeSetUp]
         public void SetUp()
         {
-            Thread.CurrentThread.CurrentCulture = culture;
+            CultureInfo.CurrentCulture = culture;
         }
 
         [Test]
