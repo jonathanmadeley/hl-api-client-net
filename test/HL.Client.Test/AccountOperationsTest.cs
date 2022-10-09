@@ -5,6 +5,9 @@ using NUnit.Framework;
 
 namespace HL.Client.Test
 {
+    /// <summary>
+    /// Ensure the parsing of account operations is correct
+    /// </summary>
     [TestFixtureSource(nameof(Cultures))]
     public class AccountOperationsTest
     {

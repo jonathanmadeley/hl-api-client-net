@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HL.Client.Test
+﻿namespace HL.Client.Test
 {
+    /// <summary>
+    /// Builds a table for testing
+    /// </summary>
     internal class HtmlTableBuilder
     {
         private readonly StringWriter _body;
         private readonly StringWriter _footer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HtmlTableBuilder"/> class.
+        /// </summary>
         public HtmlTableBuilder()
         {
             this._body = new StringWriter();
@@ -20,17 +20,17 @@ namespace HL.Client.Test
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the ID of the table
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets of sets the class of the table
         /// </summary>
         public string Class { get; set; }
 
         /// <summary>
-        /// 
+        /// Adds a row to the body of the table
         /// </summary>
         /// <param name="args"></param>
         public HtmlTableBuilder AddRow(params string[] args)
@@ -47,7 +47,7 @@ namespace HL.Client.Test
         }
 
         /// <summary>
-        /// 
+        /// Adds a footer to the table
         /// </summary>
         /// <param name="args"></param>
         public HtmlTableBuilder AddFooter(params string[] args)
