@@ -241,7 +241,7 @@ namespace HL.Client.Operations
                     Description = columns[3].InnerText.Trim('\r', '\n').Trim(),
                     UnitCost = ParseDecimalOrNull(columns[4].InnerText.Trim('\r', '\n')),
                     Quantity = ParseDecimalOrNull(columns[5].InnerText.Trim('\r', '\n')),
-                    Value = ParseDecimalOrDefault(columns[6].InnerText.Trim('\r', '\n'), 1.0m)
+                    Value = ParseDecimalOrDefault(columns[6].InnerText.Trim('\r', '\n'), 0.0m)
                 };
             }
 
