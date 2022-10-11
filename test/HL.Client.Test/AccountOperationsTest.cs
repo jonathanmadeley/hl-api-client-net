@@ -1,4 +1,5 @@
 using System.Globalization;
+using HL.Client.Entities;
 using HL.Client.Operations;
 using HtmlAgilityPack;
 using NUnit.Framework;
@@ -48,18 +49,22 @@ namespace HL.Client.Test
                 "<strong>£3.00</strong>",
                 AccountLink(999, "£4.00"));
 
-
             doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
 
             var accounts = AccountOperations.ListAccounts(doc);
 
-            Assert.AreEqual(1, accounts.Length);
-            Assert.AreEqual(999, accounts[0].Id);
-            Assert.AreEqual("0", accounts[0].Name);
-            Assert.AreEqual(1.0m, accounts[0].StockValue);
-            Assert.AreEqual(2.0m, accounts[0].CashValue);
-            Assert.AreEqual(3.0m, accounts[0].TotalValue);
-            Assert.AreEqual(4.0m, accounts[0].Available);
+            var expected = new AccountEntity
+            {
+                Id = 999,
+                Name = "0",
+                StockValue = 1.0m,
+                CashValue = 2.0m,
+                TotalValue = 3.0m,
+                Available = 4.0m
+            };
+
+            Assert.That(1, Is.EqualTo(accounts.Length), nameof(accounts.Length));
+            EntitiesAssert.AreEqual(expected, accounts[0]);
         }
 
         [Test]
@@ -84,16 +89,24 @@ namespace HL.Client.Test
 
             var stocks = AccountOperations.ListStocks(doc);
 
-            Assert.AreEqual(1, stocks.Count);
-            Assert.AreEqual("999", stocks[0].Id);
-            Assert.AreEqual("stock", stocks[0].Name);
-            Assert.AreEqual("type", stocks[0].UnitType);
-            Assert.AreEqual(2.0m, stocks[0].UnitsHeld);
-            Assert.AreEqual(3.0m, stocks[0].Price);
-            Assert.AreEqual(4.0m, stocks[0].Value);
-            Assert.AreEqual(5.0m, stocks[0].Cost);
-            Assert.AreEqual(16.0m, stocks[0].GainsLoss.Pounds);
-            Assert.AreEqual(17.0m, stocks[0].GainsLoss.Percentage);
+            var expected = new StockEntity
+            {
+                Id = "999",
+                Name = "stock",
+                UnitType = "type",
+                UnitsHeld = 2.0m,
+                Price = 3.0m,
+                Value = 4.0m,
+                Cost = 5.0m,
+                GainsLoss = new GainsLossEntity
+                {
+                    Pounds = 16.0m,
+                    Percentage = 17.0m
+                }
+            };
+
+            Assert.That(1, Is.EqualTo(stocks.Count), nameof(stocks.Count));
+            EntitiesAssert.AreEqual(expected, stocks[0]);
         }
 
         [Test]
@@ -109,12 +122,17 @@ namespace HL.Client.Test
 
             doc.Load(new StringReader(HtmlBegin + tableBuilder + HtmlEnd));
 
-            var summary = AccountOperations.GetCashSummary(doc);
+            var actual = AccountOperations.GetCashSummary(doc);
 
-            Assert.AreEqual(1.0m, summary.CashOnCapitalAccount);
-            Assert.AreEqual(2.0m, summary.IncomeLoyaltyBonus);
-            Assert.AreEqual(3.0m, summary.FixedRateOffers);
-            Assert.AreEqual(4.0m, summary.TotalCash);
+            var expected = new CashSummaryEntity
+            {
+                CashOnCapitalAccount = 1.0m,
+                IncomeLoyaltyBonus = 2.0m,
+                FixedRateOffers = 3.0m,
+                TotalCash = 4.0m
+            };
+
+            EntitiesAssert.AreEqual(expected, actual);
         }
 
         [Test]
@@ -136,15 +154,20 @@ namespace HL.Client.Test
 
             var transactions = AccountOperations.ListTransactions(doc);
 
-            Assert.AreEqual(1, transactions.Length);
-            Assert.AreEqual(new DateTime(2020, 10, 15), transactions[0].TradeDate);
-            Assert.AreEqual(new DateTime(2010, 10, 20), transactions[0].SettleDate);
-            Assert.AreEqual("a_name", transactions[0].Reference);
-            Assert.AreEqual("https://example.com/random-url/", transactions[0].ReferenceLink);
-            Assert.AreEqual("This is a description", transactions[0].Description);
-            Assert.AreEqual(null, transactions[0].UnitCost);
-            Assert.AreEqual(null, transactions[0].Quantity);
-            Assert.AreEqual(0.0m, transactions[0].Value);
+            TransactionEntity expected = new TransactionEntity
+            {
+                TradeDate = new DateTime(2020, 10, 15),
+                SettleDate = new DateTime(2010, 10, 20),
+                Reference = "a_name",
+                ReferenceLink = "https://example.com/random-url/",
+                Description = "This is a description",
+                UnitCost = null,
+                Quantity = null,
+                Value = 0.0m
+            };
+
+            Assert.That(1, Is.EqualTo(transactions.Length), nameof(transactions.Length));
+            EntitiesAssert.AreEqual(expected, transactions[0]);
         }
 
         [Test]
@@ -166,15 +189,20 @@ namespace HL.Client.Test
 
             var transactions = AccountOperations.ListTransactions(doc);
 
-            Assert.AreEqual(1, transactions.Length);
-            Assert.AreEqual(new DateTime(2020, 10, 15), transactions[0].TradeDate);
-            Assert.AreEqual(new DateTime(2010, 10, 20), transactions[0].SettleDate);
-            Assert.AreEqual("a_name", transactions[0].Reference);
-            Assert.AreEqual("https://example.com/random-url/", transactions[0].ReferenceLink);
-            Assert.AreEqual("This is a description", transactions[0].Description);
-            Assert.AreEqual(5.0m, transactions[0].UnitCost);
-            Assert.AreEqual(6.0m, transactions[0].Quantity);
-            Assert.AreEqual(7.0m, transactions[0].Value);
+            TransactionEntity expected = new TransactionEntity
+            {
+                TradeDate = new DateTime(2020, 10, 15),
+                SettleDate = new DateTime(2010, 10, 20),
+                Reference = "a_name",
+                ReferenceLink = "https://example.com/random-url/",
+                Description = "This is a description",
+                UnitCost = 5.0m,
+                Quantity = 6.0m,
+                Value = 7.0m
+            };
+
+            Assert.That(1, Is.EqualTo(transactions.Length), nameof(transactions.Length));
+            EntitiesAssert.AreEqual(expected, transactions[0]);
         }
 
         /// <summary>
