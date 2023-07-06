@@ -62,6 +62,11 @@ namespace HL.Client
         /// Gets or sets the message operations.
         /// </summary>
         public virtual MessageOperations MessageOperations { get; set; }
+
+        /// <summary>
+        /// Gets or sets the linked account operations.
+        /// </summary>
+        public virtual LinkedAccountOperations LinkedAccountOperations { get; set; }
         #endregion
 
         #region Constructor
@@ -73,6 +78,7 @@ namespace HL.Client
             // Setup the operations 
             AccountOperations = new AccountOperations(_requestor);
             MessageOperations = new MessageOperations(_requestor);
+            LinkedAccountOperations = new LinkedAccountOperations(_requestor);
         }
         #endregion
     }

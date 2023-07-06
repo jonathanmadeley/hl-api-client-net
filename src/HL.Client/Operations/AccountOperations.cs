@@ -109,7 +109,7 @@ namespace HL.Client.Operations
                 .DocumentNode
                 .Descendants("table")
                 .Where(x => x.HasClass("holdings-table"))
-                .SelectMany(table => table.SelectSingleNode("tbody").Descendants("tr"))
+                .SelectMany(table => table.SelectSingleNode("tbody")?.Descendants("tr") ?? Array.Empty<HtmlNode>())
                 .ToArray();
 
             // Convert into stock holding entities
