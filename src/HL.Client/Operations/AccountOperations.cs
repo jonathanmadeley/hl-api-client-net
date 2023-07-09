@@ -187,11 +187,13 @@ namespace HL.Client.Operations
         /// List transactions for an account.
         /// </summary>
         /// <param name="accountId">The account Id.</param>
+        /// <param name="startDate">Optional start date from which to get transactions. Defaults to account opening date.</param>
+        /// <param name="endDate">Optional end date upto which to get transactions. Defaults to today.</param>
         /// <returns></returns>
-        public async Task<TransactionEntity[]> ListTransactionsAsync(int accountId, CancellationToken cancellationToken = default)
+        public async Task<List<TransactionEntity>> ListTransactionsAsync(int accountId, DateTime? startDate = null, DateTime? endDate = null, CancellationToken cancellationToken = default)
         {
             // Make request
-            var response = await _requestor.GetAsync($"my-accounts/capital-transaction-history/account/{accountId}");
+            var response = await _requestor.GetAsync($"my-accounts/capital-transaction-history/account/{accountId}", cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -202,12 +204,74 @@ namespace HL.Client.Operations
                 throw new Exception($"Unable to get transactions for account: {accountId}");
             }
 
-            // Convert into a HTML doc
-            HtmlDocument doc = new HtmlDocument();
-            string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
-            doc.LoadHtml(html);
+            string html = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var match = Regex.Match(html, @"var\s*aod\s*=\s*'(\d{2}/\d{2}/\d{4})'");
+            if (!match.Success)
+            {
+                throw new Exception($"Unable to get account opening date for account: {accountId}");
+            }
+            var accountOpeningDateString = match.Groups[1].Value;
+            var parts = accountOpeningDateString.Split('/').Reverse().Select(int.Parse).ToArray();
+            var accountOpeningDate = new DateTime(parts[0], parts[1], parts[2]);
 
-            return ListTransactions(doc);
+            if (startDate == null || startDate < accountOpeningDate)
+            {
+                startDate = accountOpeningDate;
+            }
+
+            if (endDate == null || endDate > DateTime.Today)
+            {
+                endDate = DateTime.Today;
+            }
+
+            var allTransactions = new List<TransactionEntity>();
+
+            var current = startDate.Value;
+            while (current < endDate.Value)
+            {
+                var chunkEnd = current.AddYears(1);
+                chunkEnd = chunkEnd > endDate.Value ? endDate.Value : chunkEnd;
+                var transactions = await ListTransactionsForPeriodAsync(accountId, current, chunkEnd, cancellationToken);
+                allTransactions.AddRange(transactions);
+                // Dates are inclusive on both ends
+                current = chunkEnd.AddDays(1);
+            }
+
+            return allTransactions;
+        }
+
+        private async Task<TransactionEntity[]> ListTransactionsForPeriodAsync(int accountId, DateTime start, DateTime end, CancellationToken cancellationToken = default)
+        {
+            int page = 1;
+            var output = new List<TransactionEntity>();
+
+            while (true)
+            {
+                // Make request
+                var response = await _requestor.GetAsync($"my-accounts/capital-transaction-history/account/{accountId}?period=custom&page={page}&startDate={start.Day:00}%2F{start.Month:00}%2F{start.Year}&endDate={end.Day:00}%2F{end.Month:00}%2F{end.Year}&filter=", cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Check if 404
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        throw new ArgumentException("Unable to find account.", "accountId");
+
+                    throw new Exception($"Unable to get transactions for account: {accountId}");
+                }
+
+                // Convert into a HTML doc
+                HtmlDocument doc = new HtmlDocument();
+                string html = Regex.Replace(await response.Content.ReadAsStringAsync().ConfigureAwait(false), @"( |\t|\r?\n)\1+", "$1");
+
+                doc.LoadHtml(html);
+                output.AddRange(ListTransactions(doc));
+                if (!doc.DocumentNode.Descendants("a").Any(a => a.HasClass("next-button")))
+                {
+                    return output.ToArray();
+                }
+
+                page++;
+            }
         }
 
         /// <summary>
@@ -218,7 +282,11 @@ namespace HL.Client.Operations
         public static TransactionEntity[] ListTransactions(HtmlDocument doc)
         {
             // Get the table
-            var table = doc.DocumentNode.Descendants("table").Where(x => x.HasClass("transaction-history-table")).SingleOrDefault();
+            var table = doc.DocumentNode.Descendants("table").SingleOrDefault(x => x.HasClass("transaction-history-table"));
+            if (table == null)
+            {
+                return Array.Empty<TransactionEntity>();
+            }
             var body = table.SelectSingleNode("tbody");
             var rows = body.Descendants("tr").ToArray();
 
@@ -238,7 +306,7 @@ namespace HL.Client.Operations
                     Reference = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").InnerText.Trim('\r', '\n') : columns[2].InnerText.Trim('\r', '\n'),
                     ReferenceLink = columns[2].ChildNodes.SingleOrDefault(c => c.Name == "a") != null ? columns[2].SelectSingleNode("a").Attributes.SingleOrDefault(a => a.Name == "href").Value : null,
 
-                    Description = columns[3].InnerText.Trim('\r', '\n').Trim(),
+                    Description = HttpUtility.UrlDecode(columns[3].InnerText.Trim('\r', '\n').Trim()),
                     UnitCost = ParseDecimalOrNull(columns[4].InnerText.Trim('\r', '\n')),
                     Quantity = ParseDecimalOrNull(columns[5].InnerText.Trim('\r', '\n')),
                     Value = ParseDecimalOrDefault(columns[6].InnerText.Trim('\r', '\n'), 0.0m)
