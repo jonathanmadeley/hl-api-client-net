@@ -70,10 +70,10 @@ namespace HL.Client
         #endregion
 
         #region Constructor
-        public Client()
+        public Client(Requestor requestor = null)
         {
             // Load the requestor
-            _requestor = new Requestor();
+            _requestor = requestor ?? new Requestor();
 
             // Setup the operations 
             AccountOperations = new AccountOperations(_requestor);
