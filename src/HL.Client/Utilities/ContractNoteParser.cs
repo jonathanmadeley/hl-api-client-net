@@ -303,7 +303,7 @@ namespace HL.Client.Utilities
 
             if (tokens.TryGetValue(ElementType.Quantity, out string quantity))
             {
-                note.Quantity = double.Parse(quantity);
+                note.Quantity = decimal.Parse(quantity);
             }
 
             if (tokens.TryGetValue(ElementType.Isin, out string token))
@@ -345,16 +345,16 @@ namespace HL.Client.Utilities
 
                 if (priceDetailType == "Price (pence)")
                 {
-                    note.UnitPriceGbp = double.Parse(priceDetailValue) / 100;
+                    note.UnitPriceGbp = decimal.Parse(priceDetailValue) / 100;
                 }
                 else if (priceDetailType != null && priceDetailType.StartsWith("Price"))
                 {
-                    note.UnitPrice = double.Parse(priceDetailValue);
+                    note.UnitPrice = decimal.Parse(priceDetailValue);
                     note.UnitCurrency = priceDetailType.Split(' ').Last().Replace("(", "").Replace(")", "");
                 }
                 else if (priceDetailType == "Exchange rate")
                 {
-                    note.ExchangeRate = double.Parse(priceDetailValue);
+                    note.ExchangeRate = decimal.Parse(priceDetailValue);
                 }
             }
 
@@ -375,15 +375,15 @@ namespace HL.Client.Utilities
 
                 if (feeType == "Commission")
                 {
-                    note.Commission = double.Parse(feeValue);
+                    note.Commission = decimal.Parse(feeValue);
                 }
                 else if (feeType == "FX Charge")
                 {
-                    note.FxCharge = double.Parse(feeValue);
+                    note.FxCharge = decimal.Parse(feeValue);
                 }
                 else if (feeType == "Transfer Stamp")
                 {
-                    note.TransferFee = double.Parse(feeValue);
+                    note.TransferFee = decimal.Parse(feeValue);
                 }
 
                 if (!Enum.TryParse($"OrderDetailNote{i}", out ElementType orderDetailNoteElementType))
@@ -411,24 +411,24 @@ namespace HL.Client.Utilities
 
             if (tokens.TryGetValue(ElementType.TotalAmountIncludingFees, out string totalAmountIncludingFees))
             {
-                note.TotalAmountGbpIncludingFees = double.Parse(totalAmountIncludingFees);
+                note.TotalAmountGbpIncludingFees = decimal.Parse(totalAmountIncludingFees);
             }
 
             if (tokens.TryGetValue(ElementType.TotalAmountExcludingFees, out string totalAmountExcludingFees))
             {
-                note.TotalAmountGbpExcludingFees = double.Parse(totalAmountExcludingFees.Replace("GBP", "").Trim());
+                note.TotalAmountGbpExcludingFees = decimal.Parse(totalAmountExcludingFees.Replace("GBP", "").Trim());
             }
 
             if (tokens.TryGetValue(ElementType.UnitPrice, out var unitPrice))
             {
                 if (note.UnitPrice == default)
                 {
-                    note.UnitPrice = double.Parse(unitPrice);
+                    note.UnitPrice = decimal.Parse(unitPrice);
                 }
 
                 if (note.UnitPriceGbp == default)
                 {
-                    note.UnitPriceGbp = double.Parse(unitPrice);
+                    note.UnitPriceGbp = decimal.Parse(unitPrice);
                 }
 
                 if (note.UnitCurrency == default)

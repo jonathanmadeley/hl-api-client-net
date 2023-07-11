@@ -50,12 +50,12 @@ namespace HL.Client.Entities
         /// <summary>
         /// Gets or sets the quantity.
         /// </summary>
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
 
         /// <summary>
         /// Gets or sets the unit price in it's local currency.
         /// </summary>
-        public double UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
 
         /// <summary>
         /// Gets or sets the currency the unit price is in.
@@ -65,37 +65,37 @@ namespace HL.Client.Entities
         /// <summary>
         /// Gets or sets the exchange rate used for the transaction.
         /// </summary>
-        public double ExchangeRate { get; set; }
+        public decimal ExchangeRate { get; set; }
 
         /// <summary>
         /// Gets or sets the unit price when converted to GBP.
         /// </summary>
-        public double UnitPriceGbp { get; set; }
+        public decimal UnitPriceGbp { get; set; }
 
         /// <summary>
         /// Gets or sets the commission charged for the transaction.
         /// </summary>
-        public double Commission { get; set; }
+        public decimal Commission { get; set; }
 
         /// <summary>
         /// Gets or sets the foreign currency exchange fees charged for the transaction.
         /// </summary>
-        public double FxCharge { get; set; }
+        public decimal FxCharge { get; set; }
 
         /// <summary>
         /// Gets or sets the transfer fee.
         /// </summary>
-        public double TransferFee { get; set; }
+        public decimal TransferFee { get; set; }
 
         /// <summary>
         /// Gets or sets the total amount transacted in GBP exclusive of fees.
         /// </summary>
-        public double TotalAmountGbpExcludingFees { get; set; }
+        public decimal TotalAmountGbpExcludingFees { get; set; }
 
         /// <summary>
         /// Gets or sets the total amount transacted in GBP inclusive of fees.
         /// </summary>
-        public double TotalAmountGbpIncludingFees { get; set; }
+        public decimal TotalAmountGbpIncludingFees { get; set; }
 
         /// <summary>
         /// Gets or sets the venue where the order has been executed.
