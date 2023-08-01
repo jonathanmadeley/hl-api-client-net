@@ -21,40 +21,51 @@ namespace HL.Client.Example
             // Authenticate client
             await client.AuthenticateAsync(username, password, birthday, securityCode);
 
-            AccountEntity[] accounts = await client.AccountOperations.ListAsync();
-
-            foreach (AccountEntity account in accounts)
+            ClientAccountEntity[] clientAccounts = await client.LinkedAccountOperations.ListAsync();
+            foreach (ClientAccountEntity clientAccount in clientAccounts)
             {
-                // Account information
-                Console.WriteLine($"- Account: {account.Name}");
-                Console.WriteLine($"        Current Value: {account.TotalValue}");
-                Console.WriteLine($"        Total Share Value: {account.StockValue}");
-                Console.WriteLine($"        Cash Held on Account: {account.CashValue}");
+                Console.WriteLine($"- Client account {clientAccount.ClientNumber}: {clientAccount.Name}");
 
-                // Get information for each stock.
-                Console.WriteLine("  Stocks & Funds");
-                List<StockEntity> stocks = await client.AccountOperations.ListStocksAsync(account.Id);
-                foreach(StockEntity stock in stocks)
+                if (!clientAccount.CurrentlySelected)
                 {
-                    Console.WriteLine($"    - Stock Holding: {stock.Name}");
-                    Console.WriteLine($"        Current Value: {stock.Value}");
-                    Console.WriteLine($"        Bought at: {stock.Cost}");
-
-                    if (stock.GainsLoss.Percentage > 0)
-                        Console.WriteLine($"        You have made a PROFIT of {stock.GainsLoss.Pounds} to date.");
-                    else if (stock.GainsLoss.Percentage == 0)
-                        Console.WriteLine($"        You have not made a profit or loss to date.");
-                    else
-                        Console.WriteLine($"        You have made a LOSS of {stock.GainsLoss.Pounds} to date.");
+                    if (!await client.LinkedAccountOperations.Switch(clientAccount.ClientNumber))
+                    {
+                        Console.WriteLine("Failed to switch to account, skipping");
+                        continue;
+                    }
                 }
 
-                Console.WriteLine();
+                AccountEntity[] accounts = await client.AccountOperations.ListAsync();
+
+                foreach (AccountEntity account in accounts)
+                {
+                    // Account information
+                    Console.WriteLine($"  - Account: {account.Name}");
+                    Console.WriteLine($"          Current Value: {account.TotalValue}");
+                    Console.WriteLine($"          Total Share Value: {account.StockValue}");
+                    Console.WriteLine($"          Cash Held on Account: {account.CashValue}");
+
+                    // Get information for each stock.
+                    Console.WriteLine("    Stocks & Funds");
+                    List<StockEntity> stocks = await client.AccountOperations.ListStocksAsync(account.Id);
+                    foreach(StockEntity stock in stocks)
+                    {
+                        Console.WriteLine($"      - Stock Holding: {stock.Name} {stock.UnitsHeld} {stock.UnitType}");
+                        Console.WriteLine($"          Current Value: {stock.Value}");
+                        Console.WriteLine($"          Bought at: {stock.Cost}");
+                        Console.WriteLine($"          Bought at price: {stock.Price}");
+
+                        if (stock.GainsLoss.Percentage > 0)
+                            Console.WriteLine($"          You have made a PROFIT of {stock.GainsLoss.Pounds} to date.");
+                        else if (stock.GainsLoss.Percentage == 0)
+                            Console.WriteLine($"          You have not made a profit or loss to date.");
+                        else
+                            Console.WriteLine($"          You have made a LOSS of {stock.GainsLoss.Pounds} to date.");
+                    }
+
+                    Console.WriteLine();
+                }
             }
-
-            Console.WriteLine("Press any key to exit.");
-            Console.ReadLine();
-
-            return;
         }
     }
 }
