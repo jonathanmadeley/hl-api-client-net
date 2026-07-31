@@ -63,7 +63,7 @@ namespace HL.Client.Test
                 Available = 4.0m
             };
 
-            Assert.That(1, Is.EqualTo(accounts.Length), nameof(accounts.Length));
+            Assert.That(accounts.Length, Is.EqualTo(1), nameof(accounts.Length));
             EntitiesAssert.AreEqual(expected, accounts[0]);
         }
 
@@ -105,7 +105,7 @@ namespace HL.Client.Test
                 }
             };
 
-            Assert.That(1, Is.EqualTo(stocks.Count), nameof(stocks.Count));
+            Assert.That(stocks.Count, Is.EqualTo(1), nameof(stocks.Count));
             EntitiesAssert.AreEqual(expected, stocks[0]);
         }
 
@@ -166,7 +166,7 @@ namespace HL.Client.Test
                 Value = 0.0m
             };
 
-            Assert.That(1, Is.EqualTo(transactions.Length), nameof(transactions.Length));
+            Assert.That(transactions.Length, Is.EqualTo(1), nameof(transactions.Length));
             EntitiesAssert.AreEqual(expected, transactions[0]);
         }
 
@@ -201,7 +201,7 @@ namespace HL.Client.Test
                 Value = 7.0m
             };
 
-            Assert.That(1, Is.EqualTo(transactions.Length), nameof(transactions.Length));
+            Assert.That(transactions.Length, Is.EqualTo(1), nameof(transactions.Length));
             EntitiesAssert.AreEqual(expected, transactions[0]);
         }
 

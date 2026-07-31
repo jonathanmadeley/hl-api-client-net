@@ -156,58 +156,53 @@ namespace HL.Client.Utilities
             Dictionary<ElementType, string> output = new Dictionary<ElementType, string>();
             using (var stream = new MemoryStream(data))
             {
-                var doc = PdfReader.Open(stream, PdfDocumentOpenMode.ReadOnly);
+                var doc = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
                 foreach (var page in doc.Pages)
                 {
-                    foreach (PdfContent pageContent in page.Contents)
+                    CSequence content = ContentReader.ReadContent(page);
+                    double x = double.NaN;
+                    double y = double.NaN;
+                    string lineContent = null;
+                    foreach (var t in content)
                     {
-                        pageContent.Compressed = false;
-                        byte[] dataBytes = pageContent.Stream.Value;
-                        var parser = new CParser(dataBytes);
-                        double x = double.NaN;
-                        double y = double.NaN;
-                        string lineContent = null;
-                        foreach (var t in parser.ReadContent())
+                        if (t is COperator op)
                         {
-                            if (t is COperator op)
+                            if (op.OpCode.OpCodeName == OpCodeName.q)
                             {
-                                if (op.OpCode.OpCodeName == OpCodeName.q)
+                                x = double.NaN;
+                                y = double.NaN;
+                                lineContent = null;
+                            }
+
+                            if (op.OpCode.OpCodeName == OpCodeName.Td && op.Operands.Count == 2 &&
+                                op.Operands[0] is CReal cx && op.Operands[1] is CReal cy)
+                            {
+                                x = cx.Value;
+                                y = cy.Value;
+                            }
+
+                            if (op.OpCode.OpCodeName == OpCodeName.Tj && op.Operands[0] is CString str)
+                            {
+                                lineContent = str.Value;
+                            }
+
+                            if (op.OpCode.OpCodeName == OpCodeName.Q && !string.IsNullOrWhiteSpace(lineContent) && !double.IsNaN(x) &&
+                                !double.IsNaN(y))
+                            {
+                                if (Ignored.Contains((x, y)))
                                 {
-                                    x = double.NaN;
-                                    y = double.NaN;
-                                    lineContent = null;
+                                    continue;
                                 }
 
-                                if (op.OpCode.OpCodeName == OpCodeName.Td && op.Operands.Count == 2 &&
-                                    op.Operands[0] is CReal cx && op.Operands[1] is CReal cy)
+                                ElementType elementType = GetElementTypeFromCoordinates(x, y);
+                                if (elementType == ElementType.Unknown)
                                 {
-                                    x = cx.Value;
-                                    y = cy.Value;
+                                    throw new Exception(
+                                        $"Failed to identify PDF item at coordinates ({x}, {y}) = {lineContent}"
+                                    );
                                 }
 
-                                if (op.OpCode.OpCodeName == OpCodeName.Tj && op.Operands[0] is CString str)
-                                {
-                                    lineContent = str.Value;
-                                }
-
-                                if (op.OpCode.OpCodeName == OpCodeName.Q && !string.IsNullOrWhiteSpace(lineContent) && !double.IsNaN(x) &&
-                                    !double.IsNaN(y))
-                                {
-                                    if (Ignored.Contains((x, y)))
-                                    {
-                                        continue;
-                                    }
-
-                                    ElementType elementType = GetElementTypeFromCoordinates(x, y);
-                                    if (elementType == ElementType.Unknown)
-                                    {
-                                        throw new Exception(
-                                            $"Failed to identify PDF item at coordinates ({x}, {y}) = {lineContent}"
-                                        );
-                                    }
-
-                                    output[elementType] = lineContent;
-                                }
+                                output[elementType] = lineContent;
                             }
                         }
                     }
